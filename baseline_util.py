@@ -1,3 +1,15 @@
+def getFeatureExtractor():
+    def featureExtractor(image):
+        featureVec = {}
+        # do stuff
+        return featureVec
+
+    return featureExtractor
+
+def dotProduct(v1, v2):
+    dot_prod = 0
+    return dot_prod
+
 def learnPredictor(trainExamples, testExamples, featureExtractor):
     '''
     Given |trainExamples| and |testExamples| (each one is a list of (x,y)
@@ -39,6 +51,3 @@ def learnPredictor(trainExamples, testExamples, featureExtractor):
         print trainError, testError
     # END_YOUR_CODE
     return weights
-
-
-
