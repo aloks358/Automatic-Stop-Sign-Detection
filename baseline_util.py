@@ -1,16 +1,21 @@
 def getFeatureExtractor():
     def featureExtractor(image):
         featureVec = {}
-        # do stuff
+        for pixel in image:
+            if red:
+                featureVec[pixel] = 1
         return featureVec
-
     return featureExtractor
 
 def dotProduct(v1, v2):
-    dot_prod = 0
-    return dot_prod
+    common_nonzero_indices = [index for index in v1 if index in v2]
+    return sum([v1[index]*v2[index] for index in common_nonzero_indices])
 
-def learnPredictor(trainExamples, testExamples, featureExtractor):
+def increment(v1, scale, v2):
+    for elem in v2:
+        v1[elem] += (scale * v2[elem])
+
+def SGD(trainExamples, testExamples, featureExtractor):
     '''
     Given |trainExamples| and |testExamples| (each one is a list of (x,y)
     pairs), a |featureExtractor| to apply to x, and the number of iterations to
@@ -46,8 +51,8 @@ def learnPredictor(trainExamples, testExamples, featureExtractor):
             gradient = grad(weights, trainExample, featureExtractor)
             increment(weights, -step_size, gradient)
 
-        trainError = evaluatePredictor(trainExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
-        testError = evaluatePredictor(testExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
-        print trainError, testError
+        # trainError = evaluatePredictor(trainExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
+        # testError = evaluatePredictor(testExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
+        # print trainError, testError
     # END_YOUR_CODE
     return weights
