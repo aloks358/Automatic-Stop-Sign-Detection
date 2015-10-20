@@ -79,17 +79,17 @@ def get_image_labels():
 	with open(LABEL_FILE, 'rb') as labels_file:
         labelreader = csv.reader(labels_file, dialect='excel')
         counter = 0
-		for row in labelreader:
+        for row in labelreader:
             if counter == 0:
                 counter = 1
                 continue
 
             line = row[0]
-			split_line = line.split(';')
+            split_line = line.split(';')
             label = -1
             if split_line[1] == "stop":
                 label = 1
-			label_tup = (split_line[0], label)
+            label_tup = (split_line[0], label)
             label_tuples.append(label_tup)
 
 	return label_tuples
