@@ -20,6 +20,7 @@ def main():
 			if label == 1:  # stop sign in video
 				found_stop_sign = True
 				break
+
 		if found_stop_sign:
 			print("Found stop sign")
 		else:
