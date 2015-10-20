@@ -1,4 +1,8 @@
+import csv
+import sys, os
+
 DATA_PATH = ""
+LABEL_FILE = ""
 NUM_ITERATIONS = 10
 
 def featureExtractor(imagePath):
@@ -19,6 +23,11 @@ def increment(v1, scale, v2):
 
 def evaluate(examples, classifier):
     error = 0
+    for x, y in examples:
+        if classifier(x) != y:
+            error += 1
+
+    return float(error)/len(examples)
 
 def SGD(trainExamples, testExamples):
     weights = {}  # feature => weight
@@ -43,16 +52,19 @@ def SGD(trainExamples, testExamples):
             gradient = grad(weights, trainExample)
             increment(weights, -step_size, gradient)
 
-        # trainError = evaluatePredictor(trainExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
+        trainError = evaluate(trainExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
+        print trainError
         # testError = evaluatePredictor(testExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
         # print trainError, testError
     return weights
 
 def get_image_labels():
 	label_tuples = []
-	with open(os.path.join(DATA_PATH, LABEL_FILE), 'r') as label_map_file:
-		for line in label_map_file:
-			split_line = line.split()
+	with open(LABEL_FILE, 'rb') as labels_file:
+        labelreader = csv.reader(labels_file, dialect='excel')
+		for row in labelreader:
+            line = row[0]
+			split_line = line.split(';')
 			label_tup = (split_line[0], int(split_line[1]))
             label_tuples.append(label_tup)
 
@@ -61,7 +73,7 @@ def get_image_labels():
 def main():
     trainExamples = get_image_labels()
     testExamples = []
-    SGD(trainExamples, testExamples) 
+    SGD(trainExamples, testExamples)
 
 if __name__ = "__main__":
     main()
