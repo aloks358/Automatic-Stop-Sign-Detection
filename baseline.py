@@ -1,16 +1,32 @@
 import csv
 import sys, os
 
+from wand.image import Image
+import sys
+
 DATA_PATH = ""
 LABEL_FILE = ""
 NUM_ITERATIONS = 10
 
 def featureExtractor(imagePath):
+    #thresholds
+    bt = 10
+    gt = 10
+    rt = 0
+
+    rawpixels = []
+    im  = Image(filename = imagePath)
+    w, h = im.width, im.height
+    blob = im.make_blob(format='RGB')
+    for cursor in range(0, w*h*3,3):
+    	rawpixels.append((blob[cursor], blob[cursor+1], blob[cursor+2]))
+
     featureVec = {}
-    image =  something imagePath
-    for pixel in image:
-        if red:
-            featureVec[pixel] = 1
+    for i in range(0, len(rawpixels)):
+    	(r,g,b) = rawpixels[i]
+    	if b < bt && g < gt && r > rt:
+    		data[(r,g,b)] = 1
+
     return featureVec
 
 def dotProduct(v1, v2):
