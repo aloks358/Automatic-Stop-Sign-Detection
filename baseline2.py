@@ -7,25 +7,30 @@ DATA_PATH = "../project/better/LISA_TS"
 LABEL_FILE = "../project/better/LISA_TS/allAnnotations.csv"
 NUM_ITERATIONS = 10
 
+featureCache = {}
 def featureExtractor(imagePath):
+	if imagePath in featureCache:
+		return featureCache[imagePath]
+
 	#thresholds
-	bt = 10
-	gt = 10
+	bt = 100
+	gt = 100
 	rt = 0
 
 	rawpixels = []
 	im  = Image(filename = imagePath)
+	im.depth = 8
 	w, h = im.width, im.height
 	blob = im.make_blob(format='RGB')
 	for cursor in range(0, w*h*3,3):
-		rawpixels.append((blob[cursor], blob[cursor+1], blob[cursor+2]))
+		rawpixels.append((ord(blob[cursor]), ord(blob[cursor+1]), ord(blob[cursor+2])))
 
 	featureVec = {}
 	for i in range(0, len(rawpixels)):
 		(r,g,b) = rawpixels[i]
-		#if b < bt and g < gt and r > rt:
-		featureVec[(r,g,b)] = 1
-
+		if (r > rt and b < bt and g < gt):
+			featureVec[(r,g,b)] = 1
+	featureCache[imagePath] = featureVec
 	return featureVec
 
 def dotProduct(v1, v2):
@@ -34,7 +39,10 @@ def dotProduct(v1, v2):
 
 def increment(v1, scale, v2):
 	for elem in v2:
-		v1[elem] += (scale * v2[elem])
+		if elem in v1.keys():
+			v1[elem] += (scale * v2[elem])
+		else: 
+			v1[elem] = (scale * v2[elem])
 
 def evaluate(examples, classifier):
 	error = 0
@@ -49,7 +57,7 @@ def SGD(trainExamples, testExamples):
 	def grad(weights, trainExample):
 		x = trainExample[0]
 		y = trainExample[1]
-		features = featureExtractor(x)
+		features = featureExtractor(os.path.join(DATA_PATH,x))
 		features_scaled_y = {}
 		for feature in features:
 			features_scaled_y[feature] = features[feature]*y
@@ -66,11 +74,10 @@ def SGD(trainExamples, testExamples):
 		for trainExample in trainExamples:
 			gradient = grad(weights, trainExample)
 			increment(weights, -step_size, gradient)
-
-		trainError = evaluate(trainExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
+		trainError = evaluate(trainExamples, lambda(x) : (1 if dotProduct(featureExtractor(os.path.join(DATA_PATH,x)), weights) >= 0 else -1))
 		print trainError
-		# testError = evaluatePredictor(testExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
-		# print trainError, testError
+		testError = evaluate(testExamples, lambda(x) : (1 if dotProduct(featureExtractor(os.path.join(DATA_PATH,x)), weights) >= 0 else -1))
+		print "train error: ", trainError, "test error: ", testError
 	return weights
 
 def get_image_labels():
@@ -80,10 +87,11 @@ def get_image_labels():
 		counter = 0
 		for row in labelreader:
 			print row
+			print str(counter)
 			if counter == 0:
 				counter += 1
 				continue
-			if counter > 7000:
+			if counter > 3500:
 				return label_tuples
 			line = row[0]
 			split_line = line.split(';')
@@ -98,11 +106,9 @@ def get_image_labels():
 
 
 def main():
-	trainExamples = get_image_labels()
-	testExamples = []
-	#SGD(trainExamples, testExamples)
-	print len(trainExamples)
-	for elem in trainExamples:
-		print featureExtractor(os.path.join(DATA_PATH,elem[0]))
+	allExamples = get_image_labels()
+	trainExamples = allExamples[0:len(allExamples)/2]
+	testExamples = allExamples[(len(allExamples)/2):]
+	SGD(trainExamples, testExamples)
 
 main()
