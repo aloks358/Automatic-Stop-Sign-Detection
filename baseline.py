@@ -24,7 +24,7 @@ def featureExtractor(imagePath):
     featureVec = {}
     for i in range(0, len(rawpixels)):
     	(r,g,b) = rawpixels[i]
-    	if b < bt && g < gt && r > rt:
+    	if b < bt and g < gt and r > rt:
     		data[(r,g,b)] = 1
 
     return featureVec
