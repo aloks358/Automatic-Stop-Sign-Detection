@@ -7,6 +7,8 @@ class ImageSegmenter(object):
 		self.max_iter = maxIter
 		self.features = ["Intensity", "x", "y"]
 		self.feature_weights = {"Intensity" : 5, "x": 6, "y": 6}
+		self.x = 145
+		self.y = 145
 
 	"""
 	Allows adjusting of weights to features when comparing distances.
@@ -15,6 +17,15 @@ class ImageSegmenter(object):
 		if new_weights.keys() != self.feature_weights.keys():
 			raise ValueError("The weights must correspond to the features.")
 		self.feature_weights = new_weights
+
+	def convert_image_to_2d(image):
+		grid = []
+		for i in range(len(image)/self.y):
+			row = []
+			for j in range(self.x):
+				row.append(image[i*self.y + j])
+			grid.append(row)
+		return grid
 
 	def intensity_calc(pixel):
 		intensity = pixel[0]*0.2989 + pixel[1]*0.5870 +pixel[2]*0.1140
