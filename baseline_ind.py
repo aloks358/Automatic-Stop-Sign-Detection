@@ -3,8 +3,8 @@ import sys, os
 
 from PIL import Image
 
-DATA_PATH = "../project/better/LISA_TS"
-LABEL_FILE = "../project/better/LISA_TS/allAnnotations.csv"
+DATA_PATH = "../CS221"
+LABEL_FILE = "../CS221/allAnnotations.csv"
 NUM_ITERATIONS = 10
 
 def featureExtractor(imagePath):
@@ -59,15 +59,20 @@ def SGD(trainExamples, testExamples):
             return features
         else:
             return {}
+    temp = []
+    for i in range(0,len(trainExamples)):
+        tEx = trainExamples[i]
+        if os.path.isfile(tEx[0]) == True:
+            temp.append(tEx)
 
     numIters = NUM_ITERATIONS
     for i in range(numIters):
         step_size = 0.00225
-        for trainExample in trainExamples:
+        for trainExample in temp:
             gradient = grad(weights, trainExample)
             increment(weights, -step_size, gradient)
 
-        trainError = evaluate(trainExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
+        trainError = evaluate(temp, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
         print trainError
         # testError = evaluatePredictor(testExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
         # print trainError, testError
@@ -99,8 +104,6 @@ def main():
     #SGD(trainExamples, testExamples)
     print trainExamples
     print "test"
-
-    for elem in trainExamples: print featureExtractor(os.path.join(DATA_PATH,elem[0]))
 
 if __name__ == "__main__":
     main()
