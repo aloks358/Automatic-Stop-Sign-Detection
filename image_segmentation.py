@@ -42,7 +42,7 @@ class ImageSegmenter(object):
             	break
         	old_cost = total_cost
 
-        	for k in range(self.max_iter):
+        	for k in range(self.num_segments):
             	examples_cluster = [example for i, example in enumerate(examples) if assignments[i] == k]
             	if len(examples_cluster) > 0:
                 	first_example = copy.deepcopy(examples_cluster[0])
@@ -52,4 +52,4 @@ class ImageSegmenter(object):
                 	for elem in first_example:
                     	average[elem] = float(first_example[elem])/len(examples_cluster)
                     	centroids[k] = average
-    		return centroids, assignments, old_cost
+    	return centroids, assignments, old_cost
