@@ -17,7 +17,7 @@ class ImageSegmenter(object):
 		self.feature_weights = new_weights
 
 	def intensity_calc(pixel):
-		intensity = 0
+		intensity = pixel[0]*0.2989 + pixel[1]*0.5870 +pixel[2]*0.1140
 		return intensity
 
 	def extract_features(image):
