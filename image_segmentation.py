@@ -45,7 +45,7 @@ class ImageSegmenter(object):
 	def segment(image):
         pixels = convert_image_to_pixels(image)
 		def calc_distance(pixel, center):
-            return sum([(pixel[elem]-center[elem])**2 for elem in pixel])
+            return sum([((pixel[elem]-center[elem])**2)*self.feature_weights[elem] for elem in pixel])
     	n = len(pixels)
     	centroids = [pixels[random.randint(0, n - 1)] for k in range(K)]
     	assignments = [None]*n
