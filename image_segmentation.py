@@ -18,50 +18,37 @@ class ImageSegmenter(object):
 			raise ValueError("The weights must correspond to the features.")
 		self.feature_weights = new_weights
 
-	def convert_image_to_2d(image):
-		grid = []
+	def convert_image_to_pixels(image):
+		pixels = []
 		for i in range(len(image)/self.y):
 			row = []
 			for j in range(self.x):
-				row.append(image[i*self.y + j])
-			grid.append(row)
-		return grid
+				row.append({"Intensity" : intensity_calc(image[i*self.y + j]), "x": j, "y": i})
+			pixels.append(row)
+		return pixels
 
 	def intensity_calc(pixel):
 		intensity = pixel[0]*0.2989 + pixel[1]*0.5870 +pixel[2]*0.1140
 		return intensity
 
-	def extract_features(image):
-		features = {}
-		intensity_calc(pixel)
-
 	"""
-	Actually performs image segmentation on an image.
+	Actually performs image segmentation on a list of pixels.
 	"""
 	def segment(image):
-		def calc_distance(example, center):
-        	distance = 0
-        	for elem in example:
-            	if elem in center:
-                	distance += (example[elem] - center[elem])**2
-            	else:
-                	distance += (example[elem])**2
-        	for elem in center:
-            	if elem not in example:
-                	distance += (center[elem])**2
-        	return distance
-
-    	n = len(examples)
-    	centroids = [examples[random.randint(0, n - 1)] for k in range(K)]
+        pixels = convert_image_to_pixels(image)
+		def calc_distance(pixel, center):
+            return sum([(pixel[elem]-center[elem])**2 for elem in pixel])
+    	n = len(pixels)
+    	centroids = [pixels[random.randint(0, n - 1)] for k in range(K)]
     	assignments = [None]*n
     	old_cost = None
     	for t in range(self.max_iter):
         	total_cost = 0
-        	for i, example in enumerate(examples):
+        	for i, pixel in enumerate(pixels):
             	min_cost = None
             	assignments[i] = 0
             	for k in range(self.num_segments):
-                	cost = calc_distance(example, centroids[k])
+                	cost = calc_distance(pixel, centroids[k])
                 	if min_cost == None or cost < min_cost:
                     	min_cost = cost
                     	assignments[i] = k
@@ -72,13 +59,13 @@ class ImageSegmenter(object):
         	old_cost = total_cost
 
         	for k in range(self.num_segments):
-            	examples_cluster = [example for i, example in enumerate(examples) if assignments[i] == k]
-            	if len(examples_cluster) > 0:
-                	first_example = copy.deepcopy(examples_cluster[0])
-                	for i in range(1, len(examples_cluster)):
-                    	increment(first_example, 1, examples_cluster[i])
+            	pixels_cluster = [pixel for i, pixel in enumerate(pixels) if assignments[i] == k]
+            	if len(pixels_cluster) > 0:
+                	first_pixel = copy.deepcopy(pixels_cluster[0])
+                	for i in range(1, len(pixels_cluster)):
+                    	increment(first_pixel, 1, pixels_cluster[i])
                 	average = {}
-                	for elem in first_example:
-                    	average[elem] = float(first_example[elem])/len(examples_cluster)
+                	for elem in first_pixel:
+                    	average[elem] = float(first_pixel[elem])/len(pixels_cluster)
                     	centroids[k] = average
     	return centroids, assignments, old_cost
