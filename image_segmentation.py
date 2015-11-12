@@ -1,4 +1,4 @@
-import random, copy
+import random, copy, math
 from util import *
 """
 This class defines an image segmenter.
@@ -27,9 +27,9 @@ class ImageSegmenter(object):
         for x in range(len(image)):
             for y in range(len(image[0])):
                 pixels.append({
-                	"Intensity" : self.intensity_calc(image[x][y]), 
-                	"x": x, 
-                	"y": y})
+                    "Intensity" : self.intensity_calc(image[x][y]), 
+                    "x": x, 
+                    "y": y})
         return pixels
 
     """
@@ -45,12 +45,13 @@ class ImageSegmenter(object):
     def segment(self, image):
         pixels = self.convert_image_to_pixels(image)
         def calc_distance(pixel, center):
-            return sum([((pixel[elem]-center[elem])**2)*self.feature_weights[elem] for elem in pixel])
+            return math.sqrt(sum([((pixel[elem]-center[elem])**2)*self.feature_weights[elem] for elem in pixel]))
         n = len(pixels)
         centroids = [pixels[random.randint(0, n - 1)] for k in range(self.num_segments)]
         assignments = [None]*n
         old_cost = None
         for t in range(self.max_iter):
+            print t, old_cost
             total_cost = 0
             for i, pixel in enumerate(pixels):
                 min_cost = None
