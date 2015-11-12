@@ -7,8 +7,8 @@ class ImageSegmenter(object):
         self.max_iter = maxIter
         self.features = ["Intensity", "x", "y"]
         self.feature_weights = {"Intensity" : 5, "x": 6, "y": 6}
-        self.x = 145
-        self.y = 145
+        self.x = 704
+        self.y = 480
 
     """
     Allows adjusting of weights to features when comparing distances.
