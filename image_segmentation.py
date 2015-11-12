@@ -5,6 +5,24 @@ class ImageSegmenter(object):
 	def __init__(self, numSegments, maxIter):
 		self.num_segments = numSegments
 		self.max_iter = maxIter
+		self.features = ["Intensity", "x", "y"]
+		self.feature_weights = {"Intensity" : 5, "x": 6, "y": 6}
+
+	"""
+	Allows adjusting of weights to features when comparing distances.
+	"""
+	def set_weights(new_weights):
+		if new_weights.keys() != self.feature_weights.keys():
+			raise ValueError("The weights must correspond to the features.")
+		self.feature_weights = new_weights
+
+	def intensity_calc(pixel):
+		intensity = 0
+		return intensity
+
+	def extract_features(image):
+		features = {}
+		intensity_calc(pixel)
 
 	"""
 	Actually performs image segmentation on an image.
