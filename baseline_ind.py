@@ -1,10 +1,10 @@
 import csv
 import sys, os
 
-from wand.image import Image
+from PIL import Image
 
-DATA_PATH = "../project/better/LISA_TS"
-LABEL_FILE = "../project/better/LISA_TS/allAnnotations.csv"
+DATA_PATH = "../CS221"
+LABEL_FILE = "../CS221/allAnnotations.csv"
 NUM_ITERATIONS = 10
 
 def featureExtractor(imagePath):
@@ -13,20 +13,18 @@ def featureExtractor(imagePath):
     gt = 10
     rt = 0
 
-    print "blah"
     rawpixels = []
-    im  = Image(filename = imagePath)
+    im = Image.open(imagePath)
     w, h = im.width, im.height
     blob = im.make_blob(format='RGB')
-    for cursor in range(0, w*h*3,3):
-        rawpixels.append((blob[cursor], blob[cursor+1], blob[cursor+2]))
+    pixels = img.load()
 
-    print "blah2"
     featureVec = {}
-    for i in range(0, len(rawpixels)):
-        (r,g,b) = rawpixels[i]
-        if b < bt and g < gt and r > rt:
-            data[(r,g,b)] = 1
+    for i in range(0, img.size[0]):
+        for j in range(0,img.size[1]):
+            (r,g,b) = rawpixels[i]
+            if b < bt and g < gt and r > rt:
+                data[(r,g,b)] = 1
 
     return featureVec
 
@@ -61,15 +59,20 @@ def SGD(trainExamples, testExamples):
             return features
         else:
             return {}
+    temp = []
+    for i in range(0,len(trainExamples)):
+        tEx = trainExamples[i]
+        if os.path.isfile(tEx[0]) == True:
+            temp.append(tEx)
 
     numIters = NUM_ITERATIONS
     for i in range(numIters):
         step_size = 0.00225
-        for trainExample in trainExamples:
+        for trainExample in temp:
             gradient = grad(weights, trainExample)
             increment(weights, -step_size, gradient)
 
-        trainError = evaluate(trainExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
+        trainError = evaluate(temp, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
         print trainError
         # testError = evaluatePredictor(testExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
         # print trainError, testError
@@ -101,8 +104,6 @@ def main():
     #SGD(trainExamples, testExamples)
     print trainExamples
     print "test"
-
-    for elem in trainExamples: print featureExtractor(os.path.join(DATA_PATH,elem[0]))
 
 if __name__ == "__main__":
     main()
