@@ -18,6 +18,11 @@ class ImageSegmenter(object):
 			raise ValueError("The weights must correspond to the features.")
 		self.feature_weights = new_weights
 
+	"""
+	Take the current image format (a one-dimensional list of pixels), and extract
+	feature information for the pixels as well as represent the pixels in a grid
+	format.
+	"""
 	def convert_image_to_pixels(image):
 		pixels = []
 		for i in range(len(image)/self.y):
@@ -27,6 +32,9 @@ class ImageSegmenter(object):
 			pixels.append(row)
 		return pixels
 
+	"""
+	Takes a pixel (a RBG tuple) and returns its intensity (grayscale value)
+	"""
 	def intensity_calc(pixel):
 		intensity = pixel[0]*0.2989 + pixel[1]*0.5870 +pixel[2]*0.1140
 		return intensity
