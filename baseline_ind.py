@@ -1,7 +1,7 @@
 import csv
 import sys, os
 
-from wand.image import Image
+from PIL import Image
 
 DATA_PATH = "../project/better/LISA_TS"
 LABEL_FILE = "../project/better/LISA_TS/allAnnotations.csv"
@@ -13,20 +13,18 @@ def featureExtractor(imagePath):
     gt = 10
     rt = 0
 
-    print "blah"
     rawpixels = []
-    im  = Image(filename = imagePath)
+    im = Image.open(imagePath)
     w, h = im.width, im.height
     blob = im.make_blob(format='RGB')
-    for cursor in range(0, w*h*3,3):
-        rawpixels.append((blob[cursor], blob[cursor+1], blob[cursor+2]))
+    pixels = img.load()
 
-    print "blah2"
     featureVec = {}
-    for i in range(0, len(rawpixels)):
-        (r,g,b) = rawpixels[i]
-        if b < bt and g < gt and r > rt:
-            data[(r,g,b)] = 1
+    for i in range(0, img.size[0]):
+        for j in range(0,img.size[1]):
+            (r,g,b) = rawpixels[i]
+            if b < bt and g < gt and r > rt:
+                data[(r,g,b)] = 1
 
     return featureVec
 
