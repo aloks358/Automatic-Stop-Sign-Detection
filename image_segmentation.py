@@ -8,7 +8,7 @@ class ImageSegmenter(object):
         self.num_segments = numSegments
         self.max_iter = maxIter
         self.features = ["Intensity", "x", "y"]
-        self.feature_weights = {"Intensity" : 5, "x": 6, "y": 6}
+        self.feature_weights = {"Intensity" : 5, "x": 6, "y": 6, "R": 1, "G": 1, "B": 1}
 
     """
     Allows adjusting of weights to features when comparing distances.
@@ -29,7 +29,10 @@ class ImageSegmenter(object):
                 pixels.append({
                     "Intensity" : self.intensity_calc(image[x][y]), 
                     "x": x, 
-                    "y": y})
+                    "y": y,
+					"R": image[x][y][0],
+					"G": image[x][y][1],
+					"B": image[x][y][2]})
         return pixels
 
     """

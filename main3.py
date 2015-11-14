@@ -7,7 +7,8 @@ maxIters = 5
 
 def main():
     segmenter = ImageSegmenter(numSegments,maxIters)
-    im = Image.open("../CS221/stop_1323804701.avi_image4.png")
+    segmenter.set_weights({"Intensity" : 50, "x": 5, "y": 5, "R":0, "G":0, "B":0})
+    im = Image.open("../CS221/stop_1323804419.avi_image33.png")
     pix = get_pixels(im)
 
     segmented = segmenter.segment(get_pixels(im))
@@ -21,7 +22,7 @@ def main():
                 y = j % im.size[1]
                 x = (j - y)/im.size[1]      
                 pixelsInCluster.append((x,y))
-        im2 = Image.open("../CS221/stop_1323804701.avi_image4.png")
+        im2 = Image.open("../CS221/stop_1323804419.avi_image33.png")
         pixels = im2.load() 
         updatedGrid = image_util.isolatePixels(pixels,pixelsInCluster,im2.size[0],im2.size[1])
         for i in range(0,im2.size[0]):
