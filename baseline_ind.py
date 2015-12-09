@@ -58,8 +58,9 @@ def filterTrainExamples(trainExamples):
 def main():
     trainExamples = get_image_labels()
     testExamples = []
-    util.SGD(trainExamples, testExamples, featureExtractor)
+
     print trainExamples
+    print util.SGD(trainExamples, testExamples, featureExtractor, debug = True)
     print "test"
 
 if __name__ == "__main__":
