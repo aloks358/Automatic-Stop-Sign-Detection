@@ -1,6 +1,7 @@
 import random, copy, math, sys
 from PIL import Image
 from util import *
+import image_util
 """
 This class defines an image segmenter.
 """
@@ -84,8 +85,8 @@ class ImageSegmenter(object):
         return centroids, assignments, old_cost
 
 def main(path):
-    numSegments = 5
-    maxIters = 1
+    numSegments = 50
+    maxIters = 10
     segmenter = ImageSegmenter(numSegments,maxIters)
     segmenter.set_weights({"Intensity" : 50, "x": 5, "y": 5, "R":0, "G":0, "B":0})
     im = Image.open(path)
@@ -104,7 +105,7 @@ def main(path):
                 pixelsInCluster.append((x,y))
         x_vals = [elem[0] for elem in pixelsInCluster]
         y_vals = [elem[1] for elem in pixelsInCluster]
-        im2 = Image.open("../CS221/stop_1323804419.avi_image33.png")
+        im2 = Image.open(path)
         pixels = im2.load() 
         
         updatedGrid = image_util.isolatePixelsToImage(pixels,pixelsInCluster,min(x_vals),max(x_vals),min(y_vals),max(y_vals),name)
