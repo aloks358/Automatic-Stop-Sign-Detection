@@ -1,3 +1,9 @@
+"""
+This module generates, for every image, a shell script that executes
+image segmentation for that image. This shell script is also submitted a job
+on a computer cluster.
+"""
+
 import os
 import sys
 
@@ -8,6 +14,7 @@ SCRIPTS_PREFIX = 'subm'
 
 FULL_PREFIX = os.path.join(SCRIPTS_PATH, SCRIPTS_PREFIX)
 
+# Read the template for the shell script
 with open(TEMPLATE_SH, 'r') as f:
     template_str = f.read()
 
@@ -18,8 +25,8 @@ i = 0
 paths = os.listdir(IMAGES_PATH)
 for path in paths:
     path = os.path.join(IMAGES_PATH, path)
-    print i
-    with open(FULL_PREFIX + str(i) + '.sh', 'w') as f:
+    print i # To measure progress
+    with open(FULL_PREFIX + str(i) + '.sh', 'w') as f:  # Create shell scripts
         f.write(template_str + ' ' + path + '\n')
-    os.system('qsub ' + FULL_PREFIX + str(i) + '.sh')
+    os.system('qsub ' + FULL_PREFIX + str(i) + '.sh')   # Execute shell scripts
     i = i + 1
