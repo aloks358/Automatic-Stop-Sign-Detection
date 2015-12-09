@@ -1,9 +1,11 @@
 import csv
 import sys, os
+import util
 
 from PIL import Image
 
-DATA_PATH = "../CS221"
+
+DATA_PATH = "../LISA_TS"
 LABEL_FILE = "../CS221/allAnnotations.csv"
 NUM_ITERATIONS = 10
 
@@ -14,69 +16,17 @@ def featureExtractor(imagePath):
     rt = 0
 
     rawpixels = []
-    im = Image.open(imagePath)
-    w, h = im.width, im.height
-    blob = im.make_blob(format='RGB')
-    pixels = img.load()
+    im = Image.open(DATA_PATH + "/" + imagePath)
+    rgb_im = im.convert('RGB')
 
     featureVec = {}
-    for i in range(0, img.size[0]):
-        for j in range(0,img.size[1]):
-            (r,g,b) = rawpixels[i]
+    for i in range(0, im.size[0]):
+        for j in range(0,im.size[1]):
+            r, g, b = rgb_im.getpixel((i,j))
             if b < bt and g < gt and r > rt:
-                data[(r,g,b)] = 1
+                featureVec[(r,g,b)] = 1
 
     return featureVec
-
-def dotProduct(v1, v2):
-    common_nonzero_indices = [index for index in v1 if index in v2]
-    return sum([v1[index]*v2[index] for index in common_nonzero_indices])
-
-def increment(v1, scale, v2):
-    for elem in v2:
-        v1[elem] += (scale * v2[elem])
-
-def evaluate(examples, classifier):
-    error = 0
-    for x, y in examples:
-        if classifier(x) != y:
-            error += 1
-
-    return float(error)/len(examples)
-
-def SGD(trainExamples, testExamples):
-    weights = {}  # feature => weight
-    def grad(weights, trainExample):
-        x = trainExample[0]
-        y = trainExample[1]
-        features = featureExtractor(x)
-        features_scaled_y = {}
-        for feature in features:
-            features_scaled_y[feature] = features[feature]*y
-        if dotProduct(weights, features_scaled_y) < 1:
-            for value in features:
-                features[value] *= -y
-            return features
-        else:
-            return {}
-    temp = []
-    for i in range(0,len(trainExamples)):
-        tEx = trainExamples[i]
-        if os.path.isfile(tEx[0]) == True:
-            temp.append(tEx)
-
-    numIters = NUM_ITERATIONS
-    for i in range(numIters):
-        step_size = 0.00225
-        for trainExample in temp:
-            gradient = grad(weights, trainExample)
-            increment(weights, -step_size, gradient)
-
-        trainError = evaluate(temp, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
-        print trainError
-        # testError = evaluatePredictor(testExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
-        # print trainError, testError
-    return weights
 
 def get_image_labels():
     label_tuples = []
@@ -97,12 +47,20 @@ def get_image_labels():
 
     return label_tuples
 
+def filterTrainExamples(trainExamples):
+    temp = []
+    for i in range(0,len(trainExamples)):
+        tEx = trainExamples[i]
+        if os.path.isfile(DATA_PATH + "/" + tEx[0]) == True:
+            temp.append(tEx)
+    return temp
 
 def main():
     trainExamples = get_image_labels()
     testExamples = []
-    #SGD(trainExamples, testExamples)
+
     print trainExamples
+    print util.SGD(trainExamples, testExamples, featureExtractor, debug = True)
     print "test"
 
 if __name__ == "__main__":
