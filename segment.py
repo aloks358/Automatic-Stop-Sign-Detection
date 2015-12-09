@@ -83,10 +83,9 @@ class ImageSegmenter(object):
                         centroids[k] = average
         return centroids, assignments, old_cost
 
-
 def main(path):
-    numSegments = 50
-    maxIters = 5
+    numSegments = 5
+    maxIters = 1
     segmenter = ImageSegmenter(numSegments,maxIters)
     segmenter.set_weights({"Intensity" : 50, "x": 5, "y": 5, "R":0, "G":0, "B":0})
     im = Image.open(path)
@@ -103,14 +102,15 @@ def main(path):
                 y = j % im.size[1]
                 x = (j - y)/im.size[1]      
                 pixelsInCluster.append((x,y))
-        im2 = Image.open(path)
+        x_vals = [elem[0] for elem in pixelsInCluster]
+        y_vals = [elem[1] for elem in pixelsInCluster]
+        im2 = Image.open("../CS221/stop_1323804419.avi_image33.png")
         pixels = im2.load() 
-        updatedGrid = image_util.isolatePixels(pixels,pixelsInCluster,im2.size[0],im2.size[1])
-        for i in range(0,im2.size[0]):
-            for j in range(0,im2.size[1]):
-                pixels[i,j] = updatedGrid[i,j]
-        im2.save(name)
-            
+        
+        updatedGrid = image_util.isolatePixelsToImage(pixels,pixelsInCluster,min(x_vals),max(x_vals),min(y_vals),max(y_vals),name)
+ 
+
+           
      
 def get_pixels(im):
     return [[im.load()[x, y] for y in range(im.size[1])]for x in range(im.size[0])]
