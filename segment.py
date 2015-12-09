@@ -1,4 +1,5 @@
-import random, copy, math
+import random, copy, math, sys
+from PIL import Image
 from util import *
 """
 This class defines an image segmenter.
@@ -81,3 +82,41 @@ class ImageSegmenter(object):
                         average[elem] = float(first_pixel[elem])/len(pixels_cluster)
                         centroids[k] = average
         return centroids, assignments, old_cost
+
+
+def main(path):
+    numSegments = 50
+    maxIters = 5
+    segmenter = ImageSegmenter(numSegments,maxIters)
+    segmenter.set_weights({"Intensity" : 50, "x": 5, "y": 5, "R":0, "G":0, "B":0})
+    im = Image.open(path)
+    pix = get_pixels(im)
+
+    segmented = segmenter.segment(get_pixels(im))
+    centroids, assignments, oldcost = segmented
+    print len(assignments)
+    for i in range(0,numSegments):
+        name = "temp" + str(i) + ".png"
+        pixelsInCluster = []
+        for j in range(0, len(assignments)):
+            if assignments[j] == i:
+                y = j % im.size[1]
+                x = (j - y)/im.size[1]      
+                pixelsInCluster.append((x,y))
+        im2 = Image.open(path)
+        pixels = im2.load() 
+        updatedGrid = image_util.isolatePixels(pixels,pixelsInCluster,im2.size[0],im2.size[1])
+        for i in range(0,im2.size[0]):
+            for j in range(0,im2.size[1]):
+                pixels[i,j] = updatedGrid[i,j]
+        im2.save(name)
+            
+     
+def get_pixels(im):
+    return [[im.load()[x, y] for y in range(im.size[1])]for x in range(im.size[0])]
+
+if __name__ == "__main__":
+    if len(sys.argv) <= 1:
+        print "usage: segment.py <image>"
+    else:
+        main(sys.argv[1])
