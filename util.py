@@ -20,7 +20,7 @@ def evaluate(examples, classifier):
             error += 1
     return float(error)/len(examples)
 
- def SGD(trainExamples, testExamples, numIters=10, stepSize=0.00225, debug=False):
+def SGD(trainExamples, testExamples, numIters=10, stepSize=0.00225, debug=False):
     weights = {}  # feature => weight
     def grad(weights, trainExample):
         x = trainExample[0]
@@ -34,7 +34,7 @@ def evaluate(examples, classifier):
             return {}
     
     for i in range(numIters):
-        for trainExample in temp:
+        for trainExample in trainExamples:
             gradient = grad(weights, trainExample)
             increment(weights, -stepSize, gradient)
     
