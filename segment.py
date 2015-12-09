@@ -1,11 +1,17 @@
+"""
+This module performs image segmentation.
+"""
+
 import os
 import random, copy, math, sys
 from PIL import Image
 from util import *
 import image_util
+
 """
 This class defines an image segmenter.
 """
+
 class ImageSegmenter(object):
     def __init__(self, numSegments, maxIter):
         self.num_segments = numSegments
@@ -22,7 +28,7 @@ class ImageSegmenter(object):
         self.feature_weights = new_weights
 
     """
-    Takes the a 2D array of RGB tuples , and extracts feature 
+    Takes the a 2D array of RGB tuples , and extracts feature
     information for the pixels into a list.
     """
     def convert_image_to_pixels(self, image):
@@ -30,8 +36,8 @@ class ImageSegmenter(object):
         for x in range(len(image)):
             for y in range(len(image[0])):
                 pixels.append({
-                    "Intensity" : self.intensity_calc(image[x][y]), 
-                    "x": x, 
+                    "Intensity" : self.intensity_calc(image[x][y]),
+                    "x": x,
                     "y": y,
 					"R": image[x][y][0],
 					"G": image[x][y][1],
@@ -85,6 +91,10 @@ class ImageSegmenter(object):
                         centroids[k] = average
         return centroids, assignments, old_cost
 
+"""
+Takes a path to an image, sets the number of segments and iteration parameters for
+K-means, and creates the segments.
+"""
 def main(path):
     numSegments = 25
     maxIters = 10
@@ -102,18 +112,18 @@ def main(path):
         for j in range(0, len(assignments)):
             if assignments[j] == i:
                 y = j % im.size[1]
-                x = (j - y)/im.size[1]      
+                x = (j - y)/im.size[1]
                 pixelsInCluster.append((x,y))
         x_vals = [elem[0] for elem in pixelsInCluster]
         y_vals = [elem[1] for elem in pixelsInCluster]
         im2 = Image.open(path)
-        pixels = im2.load() 
-        
-        updatedGrid = image_util.isolatePixelsToImage(pixels,pixelsInCluster,min(x_vals),max(x_vals),min(y_vals),max(y_vals),name)
- 
+        pixels = im2.load()
 
-           
-     
+        updatedGrid = image_util.isolatePixelsToImage(pixels,pixelsInCluster,min(x_vals),max(x_vals),min(y_vals),max(y_vals),name)
+
+"""
+Given an image, returns a 2D array of RGB tuples.
+"""
 def get_pixels(im):
     return [[im.load()[x, y] for y in range(im.size[1])]for x in range(im.size[0])]
 
