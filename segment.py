@@ -96,7 +96,7 @@ def main(path):
     centroids, assignments, oldcost = segmented
     print len(assignments)
     for i in range(0,numSegments):
-        name = "temp" + str(i) + ".png"
+        name = path.replace('/', '__') +  "temp" + str(i) + ".png"
         pixelsInCluster = []
         for j in range(0, len(assignments)):
             if assignments[j] == i:
