@@ -1,3 +1,4 @@
+import os
 import random, copy, math, sys
 from PIL import Image
 from util import *
@@ -85,7 +86,7 @@ class ImageSegmenter(object):
         return centroids, assignments, old_cost
 
 def main(path):
-    numSegments = 50
+    numSegments = 25
     maxIters = 10
     segmenter = ImageSegmenter(numSegments,maxIters)
     segmenter.set_weights({"Intensity" : 50, "x": 5, "y": 5, "R":0, "G":0, "B":0})
@@ -96,7 +97,7 @@ def main(path):
     centroids, assignments, oldcost = segmented
     print len(assignments)
     for i in range(0,numSegments):
-        name = path.replace('/', '__') +  "temp" + str(i) + ".png"
+        name = os.path.join("IMAGES", path.replace('/', '__')) +  "temp" + str(i) + ".png"
         pixelsInCluster = []
         for j in range(0, len(assignments)):
             if assignments[j] == i:
