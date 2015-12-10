@@ -33,6 +33,24 @@ def hog(img):
 	hist = np.hstack(hists)     # hist is a 64 bit vector
 	return hist
 
+def red_squares_partition(im, rgb_im):
+
+	num_col = 10
+	max_red = 0
+	for i in range(0, num_col):
+		for j in range(0, num_col):
+			left_x = i * im.size[0]/num_col
+			left_y = j * im.size[1]/num_col
+			num_red = 0
+			for k in range(0, im.size[0]/num_col):
+				for l in range(0, im.size[1]/num_col):
+					r, g, b = rgb_im.getpixel((left_x + k, left_y + l))
+					if r > 77 and (r-g) > 17 and (r-b) > 17:
+						num_red += 1
+			if num_red > max_red:
+				max_red = num_red
+
+	return max_red/(im.size[0]/num_col * im.size[1]/num_col)  # Proportion of max red pixels in a square
 
 def segmentFeatureExtractor(path):
 	im = Image.open(path)
@@ -46,12 +64,15 @@ def segmentFeatureExtractor(path):
 	bl = 0
 	i_vec = []
 	r_vec = []
+
+	featureVec["max_red_square_prop"] = red_squares_partition(im, rgb_im)
+
 	for i in range(0, im.size[0]):
 		for j in range(0,im.size[1]):
 			r, g, b = rgb_im.getpixel((i,j))
 			if r == 0 and g == 0 and b == 0:
 				bl += 1
-				continue	
+				continue
 			if r > 77 and (r-g) > 17 and (r-b) > 17:
 				c += 1
 			s_r += r
@@ -98,7 +119,7 @@ def label_training_data(files):
 	return labeled_files
 
 def main():
-	
+
 	## get training data
 	## train linear model
 	## classify new images
@@ -113,8 +134,8 @@ def main():
 	final = labeled_files_stop+ labeled_files_not[0:100]
 	random.shuffle(final)
 	final_with_path = [(DATA_PATH + x[0],x[1]) for x in final]
-	#test_with_path = [(DATA_PATH + x[0],x[1]) for x in labeled_files_stop[50:100]] 
-	print util.logSGD(final_with_path, None, segmentFeatureExtractor,debug=True)
+	#test_with_path = [(DATA_PATH + x[0],x[1]) for x in labeled_files_stop[50:100]]
+	print util.SGD(final_with_path, None, segmentFeatureExtractor,debug=True)
 	for f in final_with_path:
 		classifier_label = classify_image(f[0])
 		print "File: ", f, " Classification: ", classifier_label
