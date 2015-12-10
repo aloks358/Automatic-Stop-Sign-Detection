@@ -37,11 +37,11 @@ def SGD(trainExamples, testExamples, featureExtractor, numIters=10, stepSize=0.0
         for trainExample in trainExamples:
             gradient = grad(weights, trainExample)
             increment(weights, -stepSize, gradient)
-    
-    if debug:
-        trainError = evaluate(trainExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
-        testError = evaluate(testExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
-        print 'Train error: ' + trainError + ', Test error: ' + testError
+        if debug:
+            trainError = evaluate(trainExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
+            #testError = evaluate(testExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
+            print 'Train error: ' + str(trainError)
+            #print 'Test error: ' + testError
     return weights
 
 
