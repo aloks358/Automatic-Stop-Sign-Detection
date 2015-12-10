@@ -70,10 +70,10 @@ def logSGD(trainExamples, testExamples, featureExtractor, numIters=10, stepSize=
             increment(weights, -stepSize, gradient)
         if debug:
             trainError = evaluate(trainExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
+            print weights
             if testExamples == None:
                  print 'Train error: ' + str(trainError)
                  continue
             testError = evaluate(testExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
             print 'Train error: ' + str(trainError) + ', Test error: ' + str(testError)
-    print weights
     return weights
