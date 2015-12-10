@@ -1,5 +1,6 @@
 import os
 import sys
+import random
 # import classifier module
 
 from PIL import Image
@@ -42,27 +43,35 @@ def segmentFeatureExtractor(path):
 	s_g = 0
 	s_b = 0
 	c = 0
+	bl = 0
+	i_vec = []
+	r_vec = []
 	for i in range(0, im.size[0]):
 		for j in range(0,im.size[1]):
 			r, g, b = rgb_im.getpixel((i,j))
+			if r == 0 and g == 0 and b == 0:
+				bl += 1
+				continue	
 			if r > 77 and (r-g) > 17 and (r-b) > 17:
 				c += 1
 			s_r += r
 			s_g += g
 			s_b += b
-	print s_r
-	print s_g
-	print s_b
-	featureVec["prop_red"] = float(s_r)/(s_r+s_g+s_b)
-	featureVec["prop_red_pixels"] = float(c)/(im.size[0]*im.size[1])
-	featureVec["num_red_pixels"] = float(c)
+			r_vec.append(r)
+			intensity = r*0.2989 + g*0.5870 + b*0.1140
+			i_vec.append(intensity)
+	featureVec["r_std"] = np.std(np.array(r_vec), axis = 0)
+	featureVec["i_std"] = np.std(np.array(i_vec), axis = 0)
+	#featureVec["prop_red"] = float(s_r)/(s_r+s_g+s_b)
+	featureVec["prop_red_pixels"] = float(c)/(im.size[0]*im.size[1] - bl)
+	#featureVec["num_red_pixels"] = float(c)
 
 	cv_im = cv2.imread(path,0)
 	cv_im2 = cv2.resize(cv_im, (100,100))
-	d_im2 = deskew(cv_im2)
-	hist = hog(d_im2)
-	for i in range(0,64):
-		featureVec[str(i)] = hist[i]
+	#d_im2 = deskew(cv_im2)
+	hist = hog(cv_im2)
+	#for i in range(0,64):
+	#	featureVec[str(i)] = hist[i]
 	return featureVec
 
 
@@ -89,20 +98,25 @@ def label_training_data(files):
 	return labeled_files
 
 def main():
+	
 	## get training data
 	## train linear model
 	## classify new images
 
 	files = [f for f in os.listdir(DATA_PATH) if os.path.isfile(os.path.join(DATA_PATH, f))]
-	files = files[0:100]
-	files.append("IMAGES__stop_1323896946.avi_image28.pngtemp3.png")
 
-	labeled_Files = label_training_data(files)
-
-	print files
-	print util.SGD(files, None, segmentFeatureExtractor)
-	for f in files:
-		classifier_label = classify_image(os.path.join(DATA_PATH, f))
+	labeled_files = label_training_data(files)
+	labeled_files_stop = [x for x in labeled_files if x[1] == 1]
+	labeled_files_not = [x for x in labeled_files if x[1] == -1]
+	random.shuffle(labeled_files_stop)
+	random.shuffle(labeled_files_not)
+	final = labeled_files_stop+ labeled_files_not[0:100]
+	random.shuffle(final)
+	final_with_path = [(DATA_PATH + x[0],x[1]) for x in final]
+	#test_with_path = [(DATA_PATH + x[0],x[1]) for x in labeled_files_stop[50:100]] 
+	print util.SGD(final_with_path, None, segmentFeatureExtractor,debug=True)
+	for f in final_with_path:
+		classifier_label = classify_image(f[0])
 		print "File: ", f, " Classification: ", classifier_label
 
 if __name__ == "__main__":
