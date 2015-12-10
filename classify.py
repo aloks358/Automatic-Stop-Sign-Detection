@@ -1,6 +1,6 @@
 import os
 import sys
-# import classifier module 
+# import classifier module
 
 from PIL import Image
 import cv2
@@ -20,7 +20,7 @@ def deskew(img):
 	M = np.float32([[1, skew, -0.5*SZ*skew], [0, 1, 0]])
 	img = cv2.warpAffine(img,M,(SZ, SZ),flags=affine_flags)
 	return img
-   
+
 def hog(img):
 	gx = cv2.Sobel(img, cv2.CV_32F, 1, 0)
 	gy = cv2.Sobel(img, cv2.CV_32F, 0, 1)
@@ -31,13 +31,13 @@ def hog(img):
 	hists = [np.bincount(b.ravel(), m.ravel(), bin_n) for b, m in zip(bin_cells, mag_cells)]
 	hist = np.hstack(hists)     # hist is a 64 bit vector
 	return hist
-    
+
 
 def segmentFeatureExtractor(path):
 	im = Image.open(path)
 	rgb_im = im.convert('RGB')
 	featureVec = {}
-    
+
 	s_r = 0
 	s_g = 0
 	s_b = 0
@@ -46,7 +46,7 @@ def segmentFeatureExtractor(path):
 		for j in range(0,im.size[1]):
 			r, g, b = rgb_im.getpixel((i,j))
 			if r > 77 and (r-g) > 17 and (r-b) > 17:
-				c += 1	
+				c += 1
 			s_r += r
 			s_g += g
 			s_b += b
@@ -56,7 +56,7 @@ def segmentFeatureExtractor(path):
 	featureVec["prop_red"] = float(s_r)/(s_r+s_g+s_b)
 	featureVec["prop_red_pixels"] = float(c)/(im.size[0]*im.size[1])
 	featureVec["num_red_pixels"] = float(c)
-	
+
 	cv_im = cv2.imread(path,0)
 	cv_im2 = cv2.resize(cv_im, (100,100))
 	d_im2 = deskew(cv_im2)
@@ -68,15 +68,37 @@ def segmentFeatureExtractor(path):
 
 def classify_image(path):
 	print path
-	print segmentFeatureExtractor(path)	
+	print segmentFeatureExtractor(path)
+
+def read_stop_segments():
+	with open('stop_segments.txt', 'r') as f:
+		stop_segments_set = set(f.read().splitlines())
+
+	return stop_segments_set
+
+def label_training_data(files):
+	stop_segments_set = read_stop_segments()
+	labeled_files = []
+
+	for data_file in files:
+		if data_file in stop_segments_set:
+			labeled_files.append((data_file, 1))
+		else:
+			labeled_files.append((data_file, -1))
+
+	return labeled_files
 
 def main():
 	## get training data
 	## train linear model
 	## classify new images
+
 	files = [f for f in os.listdir(DATA_PATH) if os.path.isfile(os.path.join(DATA_PATH, f))]
 	files = files[0:100]
 	files.append("IMAGES__stop_1323896946.avi_image28.pngtemp3.png")
+
+	labeled_Files = label_training_data(files)
+
 	print files
 	print util.SGD(files, None, segmentFeatureExtractor)
 	for f in files:
@@ -85,4 +107,3 @@ def main():
 
 if __name__ == "__main__":
 	main()
-
