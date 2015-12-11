@@ -46,8 +46,10 @@ def SGD(trainExamples, testExamples, featureExtractor, numIters=10, stepSize=0.0
             return {}
     
     for i in range(numIters):
+        #print "Begin iteration " + str(i)
         random.shuffle(trainExamples)
         for trainExample in trainExamples:
+            #print str(trainExample)
             gradient = grad(weights, trainExample)
             step = float(1)/math.sqrt(i+1)
             increment(weights, -step, gradient)
@@ -62,10 +64,16 @@ def SGD(trainExamples, testExamples, featureExtractor, numIters=10, stepSize=0.0
 
     testExamplesPos = [x for x in testExamples if x[1] == 1]
     testExamplesNeg = [x for x in testExamples if x[1] == -1]
-    print 'Positive classification error ' + str(evaluate(testExamplesPos, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1 )))
-    print 'Negative classification error ' + str(evaluate(testExamplesNeg, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1 )))
-    print 'Weights ' + str(weights)
-    print 'R2 ' + str(computeR(trainExamples, featureExtractor, weights))
+    pos  = 'Positive classification error ' + str(evaluate(testExamplesPos, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1 )))
+    neg = 'Negative classification error ' + str(evaluate(testExamplesNeg, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1 )))
+    beta = 'Weights ' + str(weights)
+    r2 = 'R2 ' + str(computeR(trainExamples, featureExtractor, weights))
+    f = open('linreg.out', 'w')
+    f.write(pos)
+    f.write(neg)
+    f.write(beta)
+    f.write(r2)
+    f.close()
     return weights
 
 

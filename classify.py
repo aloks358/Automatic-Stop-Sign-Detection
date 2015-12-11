@@ -7,7 +7,6 @@ from PIL import Image
 import cv2
 import util
 import numpy as np
-DATA_PATH = "segmented/RESULTS/"
 
 SZ=20
 bin_n = 16 # Number of bins
@@ -118,7 +117,7 @@ def label_training_data(files):
 
 	return labeled_files
 
-def main():
+def main(DATA_PATH):
 
 	## get training data
 	## train linear model
@@ -143,4 +142,7 @@ def main():
 		#print "File: ", f, " Classification: ", classifier_label
 
 if __name__ == "__main__":
-	main()
+    if len(sys.argv) <= 1:
+        print "usage: classify.py <path_to_segments>"
+    else:
+        main(sys.argv[1])
