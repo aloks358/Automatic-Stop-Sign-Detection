@@ -32,6 +32,15 @@ def computeR(trainExamples, featureExtractor, weights):
     SSres = sum([math.pow(float(trainExamples[i][1] - pred[i]),2) for i in range(0,len(trainExamples))])
     return float(1) - float(SSres)/SStot
 
+cache = {}
+def fe(featureExtractor,x):
+    if x in cache:
+        return cache[x]
+    else:
+        res = featureExtractor(x)
+        cache[x] = featureExtractor
+        return res
+
 def SGD(trainExamples, testExamples, featureExtractor, numIters=10, stepSize=0.00225, debug=False):
     weights = {}  # feature => weight
     features = {}
