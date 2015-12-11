@@ -20,6 +20,18 @@ def evaluate(examples, classifier):
             error += 1
     return float(error)/len(examples)
 
+def computeR(trainExamples, featureExtractor, weights):
+    mean = sum([x[1] for x in trainExamples])/float(len(trainExamples))
+    SStot = sum([math.pow(float(x[1] - mean),2) for x in trainExamples])
+    pred = [dotProduct(featureExtractor(x[0]),weights) for x in trainExamples]
+    for i in range(0,len(pred)):
+        if pred[i] > 0:
+            pred[i] = 1.0
+        else:
+            pred[i] = -1.0
+    SSres = sum([math.pow(float(trainExamples[i][1] - pred[i]),2) for i in range(0,len(trainExamples))])
+    return float(1) - float(SSres)/SStot
+
 def SGD(trainExamples, testExamples, featureExtractor, numIters=10, stepSize=0.00225, debug=False):
     weights = {}  # feature => weight
     def grad(weights, trainExample):
@@ -37,7 +49,8 @@ def SGD(trainExamples, testExamples, featureExtractor, numIters=10, stepSize=0.0
         random.shuffle(trainExamples)
         for trainExample in trainExamples:
             gradient = grad(weights, trainExample)
-            increment(weights, -stepSize, gradient)
+            step = float(1)/math.sqrt(i+1)
+            increment(weights, -step, gradient)
         if debug:
             trainError = evaluate(trainExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
             print "weights are: " + str(weights)
@@ -47,6 +60,12 @@ def SGD(trainExamples, testExamples, featureExtractor, numIters=10, stepSize=0.0
             testError = evaluate(testExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
             print 'Train error: ' + str(trainError) + ', Test error: ' + str(testError)
 
+    testExamplesPos = [x for x in testExamples if x[1] == 1]
+    testExamplesNeg = [x for x in testExamples if x[1] == -1]
+    print 'Positive classification error ' + str(evaluate(testExamplesPos, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1 )))
+    print 'Negative classification error ' + str(evaluate(testExamplesNeg, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1 )))
+    print 'Weights ' + str(weights)
+    print 'R2 ' + str(computeR(trainExamples, featureExtractor, weights))
     return weights
 
 

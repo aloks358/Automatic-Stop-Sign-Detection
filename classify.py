@@ -83,9 +83,9 @@ def segmentFeatureExtractor(path):
 			i_vec.append(intensity)
 	featureVec["r_std"] = np.std(np.array(r_vec), axis = 0)
 	featureVec["i_std"] = np.std(np.array(i_vec), axis = 0)
-	featureVec["prop_red"] = float(s_r)/(s_r+s_g+s_b)
+	#featureVec["prop_red"] = float(s_r)/(s_r+s_g+s_b)
 	featureVec["prop_red_pixels"] = float(c)/(im.size[0]*im.size[1] - bl)
-	featureVec["num_red_pixels"] = float(c)
+	#featureVec["num_red_pixels"] = float(c)
 
 	cv_im = cv2.imread(path,0)
 	cv_im2 = cv2.resize(cv_im, (100,100))
@@ -131,14 +131,16 @@ def main():
 	labeled_files_not = [x for x in labeled_files if x[1] == -1]
 	random.shuffle(labeled_files_stop)
 	random.shuffle(labeled_files_not)
-	final = labeled_files_stop+ labeled_files_not[0:100]
+	final = labeled_files
 	random.shuffle(final)
-	final_with_path = [(DATA_PATH + x[0],x[1]) for x in final]
-	#test_with_path = [(DATA_PATH + x[0],x[1]) for x in labeled_files_stop[50:100]]
-	print util.SGD(final_with_path, None, segmentFeatureExtractor,debug=True)
+	print len(final)
+	final_with_path = [(DATA_PATH + x[0],x[1]) for x in final[0:len(final)/2]]
+	test_with_path = [(DATA_PATH + x[0],x[1]) for x in final[len(final)/2:len(final)]]
+	#print len(final_with_path)
+	print util.SGD(final_with_path, test_with_path, segmentFeatureExtractor,debug=True,numIters=100)
 	for f in final_with_path:
 		classifier_label = classify_image(f[0])
-		print "File: ", f, " Classification: ", classifier_label
+		#print "File: ", f, " Classification: ", classifier_label
 
 if __name__ == "__main__":
 	main()
