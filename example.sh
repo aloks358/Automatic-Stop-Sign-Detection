@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Shell script to run image segmentation on a given image.
+# Template shell script to run image segmentation on a given image (a path to an image must be added to the last line as a parameter to segment.py).
 
 # Name the job in Grid Engine
 #$ -N image_seg

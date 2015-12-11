@@ -1,0 +1,18 @@
+Commands to Run
+
+
+Image Segmentation
+-------------------
+python segment.py [path to an image]
+
+
+Segment Classification
+----------------------
+python classify.py
+
+
+Automating Segment Classification
+---------------------------------
+python generatejobs.py
+
+
