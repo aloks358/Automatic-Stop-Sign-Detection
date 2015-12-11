@@ -136,7 +136,11 @@ def main(DATA_PATH):
 	final_with_path = [(DATA_PATH + x[0],x[1]) for x in final[0:len(final)/2]]
 	test_with_path = [(DATA_PATH + x[0],x[1]) for x in final[len(final)/2:len(final)]]
 	#print len(final_with_path)
-	print util.SGD(final_with_path, test_with_path, segmentFeatureExtractor,debug=True,numIters=100)
+	for elem in final_with_path:
+		if elem[1] == 1: print 'NO ' + str(elem)
+	for elem in test_with_path:
+		if elem[1] == 1: print 'YES ' + str(elem)
+	print util.SGD(final_with_path[0:100], test_with_path[0:100], segmentFeatureExtractor,debug=True,numIters=100)
 	for f in final_with_path:
 		classifier_label = classify_image(f[0])
 		#print "File: ", f, " Classification: ", classifier_label
