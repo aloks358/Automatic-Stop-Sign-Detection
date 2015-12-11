@@ -1,7 +1,7 @@
 import csv
 import sys, os
 import util
-
+import random
 from PIL import Image
 
 
@@ -23,7 +23,7 @@ def featureExtractor(imagePath):
     for i in range(0, im.size[0]):
         for j in range(0,im.size[1]):
             r, g, b = rgb_im.getpixel((i,j))
-            if r > 77 and (r-g) > 17 and (r-b) > 17:
+            if r > rt and g < gt and b < bt:
                 featureVec[(r,g,b)] = 1
 
     return featureVec
@@ -58,9 +58,15 @@ def filterTrainExamples(trainExamples):
 def main():
     trainExamples = get_image_labels()
     train = filterTrainExamples(trainExamples)
-    testExamples = train[len(train)/2:len(train)]
-    print len(trainExamples)
-    print util.SGD(train[len(train)/2:len(train)], testExamples, featureExtractor, debug = True)
+    random.shuffle(train)
+    train = train[0:500]  
+    for elem in train:
+        if elem[1] == 1:
+            print "YES"
+    testExamples = train[len(train)/2:]
+    print len(train[:len(train)/2])
+    print len(testExamples)
+    print util.SGD(train[:len(train)/2], testExamples, featureExtractor, debug = True)
     print "test"
 
 if __name__ == "__main__":
