@@ -59,7 +59,7 @@ def main():
     trainExamples = get_image_labels()
     train = filterTrainExamples(trainExamples)
     testExamples = train[len(train)/2:len(train)]
-    print trainExamples
+    print len(trainExamples)
     print util.SGD(train[len(train)/2:len(train)], testExamples, featureExtractor, debug = True)
     print "test"
 

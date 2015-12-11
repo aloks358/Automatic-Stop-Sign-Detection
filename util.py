@@ -47,7 +47,7 @@ def SGD(trainExamples, testExamples, featureExtractor, numIters=10, stepSize=0.0
     def grad(weights, trainExample):
         x = trainExample[0]
         y = trainExample[1]
-        features = featureExtractor(x)
+        features = fe(featureExtractor,x)
         if y*dotProduct(weights, features) < 1:
             for value in features:
                 features[value] *= -y
@@ -62,18 +62,18 @@ def SGD(trainExamples, testExamples, featureExtractor, numIters=10, stepSize=0.0
             step = float(1)/math.sqrt(i+1)
             increment(weights, -step, gradient)
         if debug:
-            trainError = evaluate(trainExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
+            trainError = evaluate(trainExamples, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1))
             print "weights are: " + str(weights)
             if testExamples == None:
                  print 'Train error: ' + str(trainError)
                  continue
-            testError = evaluate(testExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
+            testError = evaluate(testExamples, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1))
             print 'Train error: ' + str(trainError) + ', Test error: ' + str(testError)
 
     testExamplesPos = [x for x in testExamples if x[1] == 1]
     testExamplesNeg = [x for x in testExamples if x[1] == -1]
-    pos  = 'Positive classification error ' + str(evaluate(testExamplesPos, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1 )))
-    neg = 'Negative classification error ' + str(evaluate(testExamplesNeg, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1 )))
+    pos  = 'Positive classification error ' + str(evaluate(testExamplesPos, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1 )))
+    neg = 'Negative classification error ' + str(evaluate(testExamplesNeg, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1 )))
     beta = 'Weights ' + str(weights)
     r2 = 'R2 ' + str(computeR(trainExamples, featureExtractor, weights))
     f = open('linreg.out', 'w')
