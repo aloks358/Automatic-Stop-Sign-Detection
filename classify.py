@@ -130,7 +130,7 @@ def main(DATA_PATH):
 	labeled_files_not = [x for x in labeled_files if x[1] == -1]
 	random.shuffle(labeled_files_stop)
 	random.shuffle(labeled_files_not)
-	final = labeled_files[0:200]
+	final = labeled_files
 	random.shuffle(final)
 	print len(final)
 	final_with_path = [(DATA_PATH + x[0],x[1]) for x in final[0:len(final)/2]]
