@@ -17,6 +17,10 @@ segment.py
 ----------------
 Given an image, performs K-means based image segmentation.
 
+segment_util.py
+----------------
+Contains helper code for extracting features from segmented images
+
 train.py
 ----------
 Takes manually labeled segments and trains a linear classifier.
