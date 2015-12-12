@@ -1,17 +1,22 @@
 import os
 import sys
 import random
-# import classifier module
-
 from PIL import Image
 import cv2
 import util
 import numpy as np
 
-SZ=20
+"""
+Module for training and classifying segments.
+"""
+
+SZ = 20    # Parameter for HOG
 bin_n = 16 # Number of bins
 affine_flags = cv2.WARP_INVERSE_MAP|cv2.INTER_LINEAR
 
+"""
+
+"""
 def deskew(img):
 	m = cv2.moments(img)
 	if abs(m['mu02']) < 1e-2:
@@ -21,6 +26,9 @@ def deskew(img):
 	img = cv2.warpAffine(img,M,(SZ, SZ),flags=affine_flags)
 	return img
 
+"""
+
+"""
 def hog(img):
 	gx = cv2.Sobel(img, cv2.CV_32F, 1, 0)
 	gy = cv2.Sobel(img, cv2.CV_32F, 0, 1)
@@ -32,8 +40,12 @@ def hog(img):
 	hist = np.hstack(hists)     # hist is a 64 bit vector
 	return hist
 
+"""
+Red square partition is a feature.
+We partition the segment into a 10 by 10 grid, and the value of the feature
+is the proportion of red pixels of the cell with the highest such proportion.
+"""
 def red_squares_partition(im, rgb_im):
-
 	num_col = 10
 	max_red = 0
 	for i in range(0, num_col):
@@ -51,6 +63,9 @@ def red_squares_partition(im, rgb_im):
 
 	return max_red/(im.size[0]/num_col * im.size[1]/num_col)  # Proportion of max red pixels in a square
 
+"""
+
+"""
 def segmentFeatureExtractor(path):
 	im = Image.open(path)
 	rgb_im = im.convert('RGB')
@@ -72,19 +87,19 @@ def segmentFeatureExtractor(path):
 			if r == 0 and g == 0 and b == 0:
 				bl += 1
 				continue
-			if r > 77 and (r-g) > 17 and (r-b) > 17:
+			if r > 77 and (r - g) > 17 and (r - b) > 17:
 				c += 1
 			s_r += r
 			s_g += g
 			s_b += b
 			r_vec.append(r)
-			intensity = r*0.2989 + g*0.5870 + b*0.1140
+			intensity = r*0.2989 + g*0.5870 + b*0.1140   # luma
 			i_vec.append(intensity)
 	featureVec["r_std"] = np.std(np.array(r_vec), axis = 0)
 	featureVec["i_std"] = np.std(np.array(i_vec), axis = 0)
 	#featureVec["prop_red"] = float(s_r)/(s_r+s_g+s_b)
 	featureVec["prop_red_pixels"] = float(c)/(im.size[0]*im.size[1] - bl)
-	featureVec["num_red_pixels"] = float(c)
+	#featureVec["num_red_pixels"] = float(c)
 
 	cv_im = cv2.imread(path,0)
 	cv_im2 = cv2.resize(cv_im, (100,100))
@@ -99,12 +114,19 @@ def classify_image(path):
 	print path
 	print segmentFeatureExtractor(path)
 
+"""
+Reads the text file that contains the names of the segments that have a stop sign
+as per manual labelling.
+"""
 def read_stop_segments():
 	with open('stop_segments.txt', 'r') as f:
 		stop_segments_set = set(f.read().splitlines())
 
 	return stop_segments_set
 
+"""
+Given the names of files, creates pairs of (the file name, has a stop sign or not).
+"""
 def label_training_data(files):
 	stop_segments_set = read_stop_segments()
 	labeled_files = []
@@ -117,9 +139,11 @@ def label_training_data(files):
 
 	return labeled_files
 
+"""
+Gets training examples and runs SGD. 
+"""
 def main(DATA_PATH):
 
-    
 	## get training data
 	## train linear model
 	## classify new images
@@ -127,23 +151,24 @@ def main(DATA_PATH):
 	files = [f for f in os.listdir(DATA_PATH) if os.path.isfile(os.path.join(DATA_PATH, f))]
 
 	labeled_files = label_training_data(files)
-	lfs = [x for x in labeled_files if x[1] == 1]
-	print len(lfs)
-	lns = [x for x in labeled_files if x[1] == -1]
-	random.shuffle(lfs)
-	random.shuffle(lns)
-	lns = lns[0:500] 
-	final_with_path = [(DATA_PATH + x[0],x[1]) for x in lfs[:len(lfs)/2] + lns[:len(lns)/2]] 
-	test_with_path = [(DATA_PATH + x[0],x[1]) for x in lfs[len(lfs)/2:] + lns[len(lns)/2:]]
+	labeled_files_stop = [x for x in labeled_files if x[1] == 1]
+	labeled_files_not = [x for x in labeled_files if x[1] == -1]
+	random.shuffle(labeled_files_stop)
+	random.shuffle(labeled_files_not)
+	final = labeled_files
+	random.shuffle(final)
+	print len(final)
+	final_with_path = [(DATA_PATH + x[0],x[1]) for x in final[0:len(final)/2]]
+	test_with_path = [(DATA_PATH + x[0],x[1]) for x in final[len(final)/2:len(final)]]
 	#print len(final_with_path)
 	for elem in final_with_path:
 		if elem[1] == 1: print 'NO ' + str(elem)
 	for elem in test_with_path:
 		if elem[1] == 1: print 'YES ' + str(elem)
-	print util.regSGD(final_with_path, test_with_path, segmentFeatureExtractor,debug=True,numIters=100)
-	#for f in final_with_path:
-		#classifier_label = classify_image(f[0])
+	print util.SGD(final_with_path, test_with_path, segmentFeatureExtractor,debug=True,numIters=100)
+	for f in final_with_path:
+		classifier_label = classify_image(f[0])
 		#print "File: ", f, " Classification: ", classifier_label
-	
+
 if __name__ == "__main__":
-	main("RESULTS/")
+	main("segmented/RESULTS/")
