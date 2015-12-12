@@ -45,22 +45,27 @@ to be segmented, and submits these jobs automatically on a cluster.
 
 Commands to Run
 
-Baseline [output filename specified in util.sgd]
+Baseline 
+-output filename specified in util.sgd
 -------------------------
 python baseline.py
 
-
-Image Segmentation  [output filename is <image_name>temp<cluster_id>.png]
+Image Segmentation
+-directories IMAGES and RESULTS must exist prior to execution
+-input files should be stored in IMAGES
+-output filename is <image_name>temp<cluster_id>.png
+-output will be located in RESULTS
 ---------------------------
-python segment.py [path to an image]
+python segment.py [full path to an image]
 
 
-Segment Classification  [output filename specified in util.sgd]
+Segment Classification  
+-output filename specified in util.sgd
 -------------------------------
 python train.py
 
 
-Automating Segment Classification (Submits jobs to a cluster)
+Automating Segment Classification
 ----------------------------------------------
 python generatejobs.py
 
