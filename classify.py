@@ -34,7 +34,7 @@ def main():
 
     stop_sign_flag = False
     for segment in segments:
-        score = weights * seg_util.segmentFeatureExtractor(segment)
+        score = util.dotProduct(weights,seg_util.segmentFeatureExtractor(segment))
 
         if score >= 0:  # Stop sign found
             stop_sign_flag = True
