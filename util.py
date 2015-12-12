@@ -2,6 +2,10 @@
 This module defines a series of general functions.
 """
 import random, math
+
+"""
+Helper functions for computing stochastic gradient descent
+"""
 def dotProduct(v1, v2):
 	common_nonzero_indices = [index for index in v1 if index in v2]
 	return sum([v1[index]*v2[index] for index in common_nonzero_indices])
@@ -20,7 +24,9 @@ def evaluate(examples, classifier):
             error += 1
     return float(error)/len(examples)
 
-
+"""
+Wrapper function that allows for cache-ing of feature extractions
+"""
 cache = {}
 def fe(featureExtractor,x):
     if x in cache:
@@ -30,7 +36,12 @@ def fe(featureExtractor,x):
         cache[x] = res 
         return res
 
-
+"""
+Helper method that computes the R2 statistic, or the coefficient of
+determination, which gives an estimate of the amount of variance
+explained by a given linear model. R2 = 1 - SSres/SStot, where 
+SStot = sum(yi - ybar)^2 and SSres = sum(predicted_i - yi)^2
+"""
 def computeR(trainExamples, featureExtractor, weights):
     mean = sum([x[1] for x in trainExamples])/float(len(trainExamples))
     print mean
@@ -44,39 +55,8 @@ def computeR(trainExamples, featureExtractor, weights):
     SSres = sum([math.pow(float(trainExamples[i][1] - pred[i]),2) for i in range(0,len(trainExamples))])
     return float(1) - float(SSres)/SStot
 
-def SGD(trainExamples, testExamples, featureExtractor, numIters=10, stepSize=0.00225, debug=False):
-    weights = {}  # feature => weight
-    features = {}
-    lam = 1
-    def grad(weights, trainExample):
-        x = trainExample[0]
-        y = trainExample[1]
-        features = fe(featureExtractor,x)
-        if y*dotProduct(weights, features) < 1:
-            for value in features:
-                features[value] *= -y
-            return features
-        else:
-            return {}
-    
-    for i in range(numIters):
-        random.shuffle(trainExamples)
-        c = 0
-        for trainExample in trainExamples:
-            gradient = grad(weights, trainExample)
-            step = float(1)/math.sqrt(i+1)
-            increment(weights, -step, gradient)
-            c += 1
-            if i == 0: print c
-        if debug:
-            trainError = evaluate(trainExamples, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1))
-            #print "weights are: " + str(weights)
-            if testExamples == None:
-                 print 'Train error: ' + str(trainError)
-                 continue
-            testError = evaluate(testExamples, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1))
-            print 'Train error: ' + str(trainError) + ', Test error: ' + str(testError)
 
+def writeOutFile(trainExamples, testExamples, featureExtractor, weights):
     trainError = evaluate(trainExamples, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1))
     testError = evaluate(testExamples, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1))
     trainExPos = [x for x in trainExamples if x[1] == 1]
@@ -116,8 +96,45 @@ def SGD(trainExamples, testExamples, featureExtractor, numIters=10, stepSize=0.0
     f.write(str(residuals) + '\n')
     f.write(str(y) + '\n')
     f.close()
+
+"""
+Function for computing a linear classifier using the method of stochasitc gradient descent. Generates model,
+computes errors and relevant statistics, and writes them to an out file"
+"""
+def SGD(trainExamples, testExamples, featureExtractor, numIters=10, stepSize=0.00225, debug=False):
+    weights = {}  # feature => weight
+    features = {}
+    def grad(weights, trainExample):
+        x = trainExample[0]
+        y = trainExample[1]
+        features = fe(featureExtractor,x)
+        if y*dotProduct(weights, features) < 1:
+            for value in features:
+                features[value] *= -y
+            return features
+        else:
+            return {}
+    
+    for i in range(numIters):
+        random.shuffle(trainExamples)
+        for trainExample in trainExamples:
+            gradient = grad(weights, trainExample)
+            step = float(1)/math.sqrt(i+1)
+            increment(weights, -step, gradient)
+        if debug:
+            trainError = evaluate(trainExamples, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1))
+            testError = evaluate(testExamples, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1))
+            print 'Train error: ' + str(trainError) + ', Test error: ' + str(testError)
+
+    writeOutFile(trainExamples,testExamples,weights)
     return weights
 
+""" 
+Function for computing a linear classifier with L2 norm penalty using the method of stochasitc gradient descent. 
+Generates model, computes errors and relevant statistics, and writes them to an out file"
+"""
+
+##we let the lambda value be some constant
 lam = 0.07096536
 def regSGD(trainExamples, testExamples, featureExtractor, numIters=10, stepSize=0.00225, debug=False):
     def grad(weights, trainExample, i, u,v):
@@ -141,157 +158,12 @@ def regSGD(trainExamples, testExamples, featureExtractor, numIters=10, stepSize=
     features = {}
     for i in range(numIters):
         random.shuffle(trainExamples)
-        c = 0
         for trainExample in trainExamples:
             weights = grad(weights, trainExample, i,u,v)
-            c += 1
-            if i == 0:
-                print c
-            
-            trainError = evaluate(trainExamples, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1))
-            testError = evaluate(testExamples, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1))
-            print trainError
-            print testError
         if debug:
             trainError = evaluate(trainExamples, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1))
-            #print "weights are: " + str(weights)
-            if testExamples == None:
-                 print 'Train error: ' + str(trainError)
-                 continue
             testError = evaluate(testExamples, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1))
             print 'Train error: ' + str(trainError) + ', Test error: ' + str(testError)
-
-    trainError = evaluate(trainExamples, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1))
-    testError = evaluate(testExamples, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1))
-    trainExPos = [x for x in trainExamples if x[1] == 1]
-    trainExNeg = [x for x in trainExamples if x[1] == -1]
-    testExamplesPos = [x for x in testExamples if x[1] == 1]
-    testExamplesNeg = [x for x in testExamples if x[1] == -1]
-    
-    t_pos_n = 'Positive n is ' + str(len(trainExPos))
-    t_neg_n = 'Negative n is ' + str(len(trainExNeg))
-    t_pos  = 'Positive classification error ' + str(evaluate(trainExPos, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1 )))
-    t_neg = 'Negative classification error ' + str(evaluate(trainExNeg, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1 )))
-    pos_n = 'Positive n is ' + str(len(testExamplesPos))
-    neg_n = 'Negative n is ' + str(len(testExamplesNeg))
-    pos  = 'Positive classification error ' + str(evaluate(testExamplesPos, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1 )))
-    neg = 'Negative classification error ' + str(evaluate(testExamplesNeg, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1 )))
-    beta = 'Weights ' + str(weights)
-    #r2 = 'R2 ' + str(computeR(trainExamples, featureExtractor, weights))
-    f = open('linreg.out', 'w')
-    f.write('train' + '\n')
-    f.write(t_pos_n + '\n')
-    f.write(t_neg_n + '\n')
-    f.write(t_pos + '\n')
-    f.write(t_neg + '\n')
-    f.write('test' + '\n')
-    f.write(pos_n + '\n')
-    f.write(neg_n + '\n')
-    f.write(pos + '\n')
-    f.write(neg + '\n')
-    f.write(beta + '\n')
-    f.write(str(trainError) + '\n')
-    f.write(str(testError) + '\n')
-    #f.write(r2 + '\n')
-    f.close()
-    return weights
-
-def logSGD(trainExamples, testExamples, featureExtractor, numIters=10, stepSize=0.00225, debug=False):
-    weights = {}  # feature => weight
-    eta = 0.1
-    def grad(weights, trainExample):
-        x = trainExample[0]
-        y = trainExample[1]
-        features = fe(featureExtractor,x)
-        dot = dotProduct(weights,features)
-        val = float(-2) * (math.pow(( 1 + math.exp(-1*dot)),-1) - y) * (math.pow((1 + math.exp(-1*dot)),-2))*math.exp(-1*dot)
-        for elem in features:
-            features[elem] *= val
-        return features
-
-    for i in range(numIters):
-        random.shuffle(trainExamples)
-        for trainExample in trainExamples:
-            gradient = grad(weights, trainExample)
-            increment(weights, -stepSize, gradient)
-            print "incremented"
-        if debug:
-            trainError = evaluate(trainExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
-            print weights
-            if testExamples == None:
-                 print 'Train error: ' + str(trainError)
-                 continue
-            testError = evaluate(testExamples, lambda(x) : (1 if dotProduct(featureExtractor(x), weights) >= 0 else -1))
-            print 'Train error: ' + str(trainError) + ', Test error: ' + str(testError)
-    return weights
-
-
-
-
-
-def logSGD(trainExamples, testExamples, featureExtractor, numIters=10, stepSize=0.00225, debug=False):
-    weights = {}  # feature => weight
-    features = {}
-    eta = 0.1
-    def grad(weights, trainExample):
-        x = trainExample[0]
-        y = trainExample[1]
-        features = featureExtractor(x)
-        dot = dotProduct(weights,features)
-        val = float(-2) * (math.pow(( 1 + math.exp(-1*dot)),-1) - y) * (math.pow((1 + math.exp(-1*dot)),-2))*math.exp(-1*dot)
-        for elem in features:
-            features[elem] *= val
-        return features
-    for i in range(numIters):
-        random.shuffle(trainExamples)
-        c = 0
-        for trainExample in trainExamples:
-            gradient = grad(weights, trainExample)
-            step = float(1)/math.sqrt(i+1)
-            increment(weights, -step, gradient)
-            c += 1
-            if i == 0: print c
-        if debug:
-            trainError = evaluate(trainExamples, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1))
-            #print "weights are: " + str(weights)
-            if testExamples == None:
-                 print 'Train error: ' + str(trainError)
-                 continue
-            testError = evaluate(testExamples, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1))
-            print 'Train error: ' + str(trainError) + ', Test error: ' + str(testError)
-
-    trainError = evaluate(trainExamples, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1))
-    testError = evaluate(testExamples, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1))
-    trainExPos = [x for x in trainExamples if x[1] == 1]
-    trainExNeg = [x for x in trainExamples if x[1] == -1]
-    testExamplesPos = [x for x in testExamples if x[1] == 1]
-    testExamplesNeg = [x for x in testExamples if x[1] == -1]
-    
-    t_pos_n = 'Positive n is ' + str(len(trainExPos))
-    t_neg_n = 'Negative n is ' + str(len(trainExNeg))
-    t_pos  = 'Positive classification error ' + str(evaluate(trainExPos, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1 )))
-    t_neg = 'Negative classification error ' + str(evaluate(trainExNeg, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1 )))
-    pos_n = 'Positive n is ' + str(len(testExamplesPos))
-    neg_n = 'Negative n is ' + str(len(testExamplesNeg))
-    pos  = 'Positive classification error ' + str(evaluate(testExamplesPos, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1 )))
-    neg = 'Negative classification error ' + str(evaluate(testExamplesNeg, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1 )))
-    beta = 'Weights ' + str(weights)
-    r2 = 'R2 ' + str(computeR(trainExamples, featureExtractor, weights))
-    f = open('linreg.out', 'w')
-    f.write('train' + '\n')
-    f.write(t_pos_n + '\n')
-    f.write(t_neg_n + '\n')
-    f.write(t_pos + '\n')
-    f.write(t_neg + '\n')
-    f.write('test' + '\n')
-    f.write(pos_n + '\n')
-    f.write(neg_n + '\n')
-    f.write(pos + '\n')
-    f.write(neg + '\n')
-    f.write(beta + '\n')
-    f.write(str(trainError) + '\n')
-    f.write(str(testError) + '\n')
-    f.write(r2 + '\n')
-    f.close()
+    writeOutFile(trainExamples,testExamples,weights)
     return weights
 

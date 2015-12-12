@@ -141,15 +141,17 @@ def main(DATA_PATH):
 
 	labeled_files = label_training_data(files)
 
-	#separate labeled segments into stop sign and not stop sign lists
+	#separate labeled segments into stop sign and not stop sign lists, shuffle, and downsample
 	labeled_files_stop = [x for x in labeled_files if x[1] == 1]
 	labeled_files_not = [x for x in labeled_files if x[1] == -1]
 	random.shuffle(labeled_files_stop)
 	random.shuffle(labeled_files_not)
+	labeled_files_not = labeled_files_not[0:500]
 
 	# generate training and test data, append paths to training and test data
-	final_with_path = [(DATA_PATH + x[0],x[1]) for x in final[0:len(final)/2]]
-	test_with_path = [(DATA_PATH + x[0],x[1]) for x in final[len(final)/2:len(final)]]
+	final_with_path = [(DATA_PATH + x[0],x[1]) for x in labeled_files_stop[:len(labeled_files_stop)/2] + labeled_files_not[:len(labeled_files_not)/2]]
+	test_with_path = [(DATA_PATH + x[0],x[1]) for x in  labeled_files_stop[len(labeled_files_stop)/2:] + labeled_files_not[len(labeled_files_not)/2:]] 
+
 	weights = util.SGD(final_with_path, test_with_path, segmentFeatureExtractor,debug=True,numIters=100)
 
 if __name__ == "__main__":
