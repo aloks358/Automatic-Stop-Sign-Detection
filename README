@@ -4,52 +4,66 @@ baseline.py
 -------------------------
 Module for baseline feature extraction and for generating the corresponding linear model.
 
+
 image_util.py
 -------------------------
 Image processing functions for converting and saving images into their individual segments.
 
+
 util.py
 --------
-General functions for working with vectors (such as dotProduct) and machine learning (stochastic 
-gradient descent, used in both the baseline and main project implementation). 
+General functions for working with vectors (such as dotProduct) and machine learning (stochastic
+gradient descent, used in both the baseline and main project implementation).
 
-segment.py
-----------------
-Given an image, performs K-means based image segmentation.
 
 segment_util.py
 ----------------
 Contains helper code for extracting features from segmented images
 
+
+segment.py
+----------------
+Given an image, performs K-means based image segmentation.
+
+
 train.py
+-outputs a weights.out for the linear classifier and regression analysis results
 ----------
 Takes manually labeled segments and trains a linear classifier.
 
+
+classify.py
+-----------
+Given an image, performs image segmentation on it and classifies each of the segments
+in order to determine if the image has a stop sign or not.
+
+
 video.py
 -----------
-Module for extracting frames from a given video and running sign classification to determine 
-presence of stop signs. [Code was not used due to computational infeasibility of real-time 
+Module for extracting frames from a given video and running sign classification to determine
+presence of stop signs. [Code was not used due to computational infeasibility of real-time
 segmentation/classification with K-means.]
 
 
 sgd.sh
 ---------
-A shell script for stochastic gradient descent jobs. 
+A shell script for stochastic gradient descent jobs.
 
 
 example.sh
 -------------------------
-A template shell script for submitting a segmentation job for one image. 
+A template shell script for submitting a segmentation job for one image.
+
 
 generatejobs.py
 -------------------------
-Creates the above template shell script (example.sh) for every single image that needs 
+Creates the above template shell script (example.sh) for every single image that needs
 to be segmented, and submits these jobs automatically on a cluster.
 
 
 Commands to Run
 
-Baseline 
+Baseline
 -output filename specified in util.sgd
 -------------------------
 python baseline.py
@@ -60,10 +74,10 @@ Image Segmentation
 -output filename is <image_name>temp<cluster_id>.png
 -output will be located in RESULTS
 ---------------------------
-python segment.py [full path to an image]
+python segment.py [path to an image]
 
 
-Segment Classification  
+Segment Classification
 -output filename specified in util.sgd
 -------------------------------
 python train.py
@@ -74,4 +88,6 @@ Automating Segment Classification
 python generatejobs.py
 
 
-
+Image Classification
+--------------------
+python classify.py [path to an image]
