@@ -101,9 +101,9 @@ def main(path):
     segmenter = ImageSegmenter(numSegments,maxIters)
     segmenter.set_weights({"Intensity" : 50, "x": 5, "y": 5, "R":0, "G":0, "B":0})
     im = Image.open(path)
-    pix = get_pixels(im)
+    pix = image_util.get_pixels(im)
 
-    segmented = segmenter.segment(get_pixels(im))
+    segmented = segmenter.segment(image_util.get_pixels(im))
     centroids, assignments, oldcost = segmented
     print len(assignments)
     for i in range(0,numSegments):
