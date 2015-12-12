@@ -121,11 +121,6 @@ def main(path):
 
         updatedGrid = image_util.isolatePixelsToImage(pixels,pixelsInCluster,min(x_vals),max(x_vals),min(y_vals),max(y_vals),name)
 
-"""
-Given an image, returns a 2D array of RGB tuples.
-"""
-def get_pixels(im):
-    return [[im.load()[x, y] for y in range(im.size[1])]for x in range(im.size[0])]
 
 if __name__ == "__main__":
     if len(sys.argv) <= 1:

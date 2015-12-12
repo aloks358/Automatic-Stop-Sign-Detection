@@ -96,6 +96,9 @@ def writeOutFile(trainExamples, testExamples, featureExtractor, weights):
     f.write(str(residuals) + '\n')
     f.write(str(y) + '\n')
     f.close()
+    g = open('weights.out','w')
+    g.write(str(weights))
+    g.close()
 
 """
 Function for computing a linear classifier using the method of stochasitc gradient descent. Generates model,
