@@ -27,7 +27,7 @@ def main():
     segments = []
     for f in os.listdir(SEGMENTS_PATH):
         if 'temp' in f and image_name in f: # Ways to identify segments of the given path
-             segments.append(f)
+             segments.append(os.path.join(SEGMENTS_PATH,f))
 
     f = open('weights.out')   # Read in weights
     weights = eval(f.readline())
