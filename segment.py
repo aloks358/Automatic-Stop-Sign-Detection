@@ -62,7 +62,7 @@ class ImageSegmenter(object):
         centroids = [pixels[random.randint(0, n - 1)] for k in range(self.num_segments)]
         assignments = [None]*n
         old_cost = None
-        for t in range(self.max_iter):
+        for t in range(self.max_iter):  # K-mean alternating minimization
             print t, old_cost
             total_cost = 0
             for i, pixel in enumerate(pixels):
