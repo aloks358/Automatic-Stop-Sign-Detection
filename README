@@ -27,7 +27,6 @@ Given an image, performs K-means based image segmentation.
 
 
 train.py
--outputs a weights.out for the linear classifier and regression analysis results
 ----------
 Takes manually labeled segments and trains a linear classifier.
 
@@ -78,7 +77,8 @@ python segment.py [path to an image]
 
 
 Segment Classification
--output filename specified in util.sgd
+-outputs a weights.out for the linear classifier and regression analysis results (filename for this analysis
+available in util.sgd)
 -------------------------------
 python train.py
 
