@@ -15,7 +15,9 @@ bin_n = 16 # Number of bins
 affine_flags = cv2.WARP_INVERSE_MAP|cv2.INTER_LINEAR
 
 """
-
+Code for normalizing images and computing their HOG features
+Taken from http://opencv-python-tutroals.readthedocs.org/en/latest/py_tutorials/py_ml/py_svm/py_svm_opencv/py_svm_opencv.html
+(C) Mordvintsev & Abid
 """
 def deskew(img):
 	m = cv2.moments(img)
@@ -26,9 +28,6 @@ def deskew(img):
 	img = cv2.warpAffine(img,M,(SZ, SZ),flags=affine_flags)
 	return img
 
-"""
-
-"""
 def hog(img):
 	gx = cv2.Sobel(img, cv2.CV_32F, 1, 0)
 	gy = cv2.Sobel(img, cv2.CV_32F, 0, 1)
@@ -64,7 +63,8 @@ def red_squares_partition(im, rgb_im):
 	return max_red/(im.size[0]/num_col * im.size[1]/num_col)  # Proportion of max red pixels in a square
 
 """
-
+Takes a given image pathname, loads it as an RGB image, and computes
+its features. Returns a dictionary of feature -> value
 """
 def segmentFeatureExtractor(path):
 	im = Image.open(path)
@@ -97,9 +97,7 @@ def segmentFeatureExtractor(path):
 			i_vec.append(intensity)
 	featureVec["r_std"] = np.std(np.array(r_vec), axis = 0)
 	featureVec["i_std"] = np.std(np.array(i_vec), axis = 0)
-	#featureVec["prop_red"] = float(s_r)/(s_r+s_g+s_b)
 	featureVec["prop_red_pixels"] = float(c)/(im.size[0]*im.size[1] - bl)
-	#featureVec["num_red_pixels"] = float(c)
 
 	cv_im = cv2.imread(path,0)
 	cv_im2 = cv2.resize(cv_im, (100,100))
@@ -108,11 +106,6 @@ def segmentFeatureExtractor(path):
 	for i in range(0,64):
 		featureVec[str(i)] = hist[i]
 	return featureVec
-
-
-def classify_image(path):
-	print path
-	print segmentFeatureExtractor(path)
 
 """
 Reads the text file that contains the names of the segments that have a stop sign
@@ -144,31 +137,20 @@ Gets training examples and runs SGD.
 """
 def main(DATA_PATH):
 
-	## get training data
-	## train linear model
-	## classify new images
-
 	files = [f for f in os.listdir(DATA_PATH) if os.path.isfile(os.path.join(DATA_PATH, f))]
 
 	labeled_files = label_training_data(files)
+
+	#separate labeled segments into stop sign and not stop sign lists
 	labeled_files_stop = [x for x in labeled_files if x[1] == 1]
 	labeled_files_not = [x for x in labeled_files if x[1] == -1]
 	random.shuffle(labeled_files_stop)
 	random.shuffle(labeled_files_not)
-	final = labeled_files
-	random.shuffle(final)
-	print len(final)
+
+	# generate training and test data, append paths to training and test data
 	final_with_path = [(DATA_PATH + x[0],x[1]) for x in final[0:len(final)/2]]
 	test_with_path = [(DATA_PATH + x[0],x[1]) for x in final[len(final)/2:len(final)]]
-	#print len(final_with_path)
-	for elem in final_with_path:
-		if elem[1] == 1: print 'NO ' + str(elem)
-	for elem in test_with_path:
-		if elem[1] == 1: print 'YES ' + str(elem)
-	print util.SGD(final_with_path, test_with_path, segmentFeatureExtractor,debug=True,numIters=100)
-	for f in final_with_path:
-		classifier_label = classify_image(f[0])
-		#print "File: ", f, " Classification: ", classifier_label
+	weights = util.SGD(final_with_path, test_with_path, segmentFeatureExtractor,debug=True,numIters=100)
 
 if __name__ == "__main__":
 	main("segmented/RESULTS/")
