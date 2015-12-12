@@ -146,8 +146,12 @@ def regSGD(trainExamples, testExamples, featureExtractor, numIters=10, stepSize=
             weights = grad(weights, trainExample, i,u,v)
             c += 1
             if i == 0:
-                print weights 
                 print c
+            
+            trainError = evaluate(trainExamples, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1))
+            testError = evaluate(testExamples, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1))
+            print trainError
+            print testError
         if debug:
             trainError = evaluate(trainExamples, lambda(x) : (1 if dotProduct(fe(featureExtractor,x), weights) >= 0 else -1))
             #print "weights are: " + str(weights)
