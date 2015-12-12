@@ -77,8 +77,8 @@ python segment.py [path to an image]
 
 
 Segment Classification
--outputs a weights.out for the linear classifier and regression analysis results (filename for this analysis
-available in util.sgd)
+-outputs a weights.out for the linear classifier
+-outputs regression analysis results (filename for this analysis determined in util.sgd)
 -------------------------------
 python train.py
 
